@@ -1,4 +1,6 @@
 #!/bin/bash
 
-/opt/setup.sh
+if [ ! -d "/workspace/ComfyUI" ]; then
+    /opt/setup.sh
+fi
 cd /workspace/ComfyUI && source venv/bin/activate && python main.py --listen 0.0.0.0 --port 8188
