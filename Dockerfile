@@ -1,7 +1,6 @@
-FROM ubuntu:22.04
+FROM celestius/infinitetalk:0.0.2
 
-COPY setup.sh /opt/setup.sh
-COPY entrypoint.sh /opt/entrypoint.sh
+COPY *.sh /opt/
 WORKDIR /opt
 
 ENTRYPOINT ["/opt/entrypoint.sh"]
