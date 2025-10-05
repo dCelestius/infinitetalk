@@ -75,3 +75,42 @@ if [ ! -f "Wan2_1_VAE_fp32.safetensors" ] && [ -f "Wan2_1_VAE_bf16.safetensors" 
     ln -sf Wan2_1_VAE_bf16.safetensors Wan2_1_VAE_fp32.safetensors
     echo "✅ Created fp32 -> bf16 VAE compatibility link"
 fi
+
+# --- 10: Create comprehensive model structure info file (UPDATED) ---
+echo "--- Creating model structure info ---"
+cat > "$COMFYUI_DIR/models/MODEL_INFO.txt" <<EOL
+# Model Structure for Workflows - September 2025 (RunPod /workspace/ComfyUI)
+
+## InfiniteTalk Models (models/multitalk/)
+- infinite_talk.safetensors (main model)
+- infinitetalk_single.safetensors (single person ComfyUI)
+- infinitetalk_multi.safetensors (multiple people ComfyUI)
+
+## WanVideo/InfiniteTalk GGUF Models (models/diffusion_models/)
+- wan2.1-i2v-14b-480p-Q4_K_M.gguf (WanVideo GGUF - recommended for low RAM)
+- wan2.1-i2v-14b-480p-Q8_0.gguf (WanVideo GGUF - higher quality)
+- Wan2_1-InfiniteTalk_Single_Q8.gguf (InfiniteTalk GGUF)
+
+## VAE Models (models/vae/)
+- Wan2_1_VAE_bf16.safetensors (actual WanVideo VAE - compatible with WanVideoVAELoader)
+- Wan2_1_VAE_fp32.safetensors (fp32 version if available, otherwise symlinked to bf16)
+
+## Text Encoders (models/text_encoders/)
+- umt5-xxl-enc-bf16.safetensors (for InfiniteTalk)
+
+## CLIP Vision (models/clip_vision/)
+- clip_vision_h.safetensors (for InfiniteTalk)
+
+## Audio (models/audio/)
+- chinese-wav2vec2-base.bin (speech recognition)
+
+## LoRAs (models/loras/)
+- Wan21_T2V_14B_lightx2v_cfg_step_distill_lora_rank32.safetensors (recommended)
+- lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors (if available)
+
+## Workflow Fixes for Common Errors:
+1. WanVideoVAELoader error: Use 'Wan2_1_VAE_fp32.safetensors' or remove VAE loader
+2. Model path errors: Use filename only, no subdirectories (e.g., 'wan2.1-i2v-14b-480p-Q4_K_M.gguf')
+3. Sampler field errors: Use default values (start_step: 0, end_step: 25, cfg: 7.0)
+4. LoRA path errors: Use exact filename from /models/loras/ folder
+EOL

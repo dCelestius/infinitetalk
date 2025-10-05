@@ -7,101 +7,10 @@ if [ ! -f "/workspace/ComfyUI/models/MODEL_INFO.txt" ]; then
     /opt/models.sh
 fi
 
-# --- 7: Configure ComfyUI Model Paths via extra_model_paths.yaml (SIMPLIFIED) ---
-echo "--- Configuring models via extra_model_paths.yaml ---"
-cd "$COMFYUI_DIR"
-
-cat > extra_model_paths.yaml <<EOL
-# ComfyUI model paths configuration (Optimized for RunPod /workspace)
-
-comfyui:
-  base_path: ./
-  checkpoints: models/checkpoints/
-  clip: models/clip/
-  clip_vision: models/clip_vision/
-  configs: models/configs/
-  controlnet: models/controlnet/
-  diffusion_models: models/diffusion_models/
-  embeddings: models/embeddings/
-  loras: models/loras/
-  audio: models/audio/
-  text_encoders: models/text_encoders/
-  upscale_models: models/upscale_models/
-  vae: models/vae/
-  multitalk: models/multitalk/
-  video: models/video/
-EOL
-
-# --- 8: Install Python dependencies ---
-echo "--- Installing additional Python dependencies ---"
-# Use full path to activate the virtual environment
-source "$COMFYUI_DIR/venv/bin/activate"
-
-pip install xformers || echo "Warning: xformers failed"
-pip install "xfuser>=0.4.1" || echo "Warning: xfuser failed"
-
-# Core ML dependencies
-pip install onnx onnxruntime gguf basicsr soundfile librosa einops torchvision torchaudio demucs sageattention \
-opencv-python>=4.9.0 "diffusers>=0.31.0" "transformers>=4.49.0" "tokenizers>=0.20.3" "accelerate>=1.1.1" tqdm \
-imageio easydict ftfy dashscope imageio-ffmpeg scikit-image loguru gradio>=5.0.0 "numpy>=1.23.5,<2" \
-pyloudnorm optimum-quanto scenedetect moviepy decord || echo "Warning: Some dependencies failed"
-
-# Install custom node requirements if they exist
-if [ -f "$CUSTOM_NODES_DIR/ComfyUI-WanVideoWrapper/requirements.txt" ]; then
-    echo "Installing WanVideoWrapper requirements..."
-    pip install -r "$CUSTOM_NODES_DIR/ComfyUI-WanVideoWrapper/requirements.txt" || echo "Warning: WanVideoWrapper requirements failed"
-fi
-
-if [ -f "$CUSTOM_NODES_DIR/InfiniteTalk/requirements.txt" ]; then
-    echo "Installing InfiniteTalk requirements..."
-    pip install -r "$CUSTOM_NODES_DIR/InfiniteTalk/requirements.txt" || echo "Warning: InfiniteTalk requirements failed"
-fi
-
-# Additional dependencies for video processing
-pip install av python-ffmpeg || echo "Warning: Video processing dependencies failed"
-
 # --- 9: Clear ComfyUI cache (Will use the container's home cache) ---
 echo "--- Clearing ComfyUI cache ---"
 rm -rf ~/.ComfyUI/cache
 
-# --- 10: Create comprehensive model structure info file (UPDATED) ---
-echo "--- Creating model structure info ---"
-cat > "$COMFYUI_DIR/models/MODEL_INFO.txt" <<EOL
-# Model Structure for Workflows - September 2025 (RunPod /workspace/ComfyUI)
-
-## InfiniteTalk Models (models/multitalk/)
-- infinite_talk.safetensors (main model)
-- infinitetalk_single.safetensors (single person ComfyUI)
-- infinitetalk_multi.safetensors (multiple people ComfyUI)
-
-## WanVideo/InfiniteTalk GGUF Models (models/diffusion_models/)
-- wan2.1-i2v-14b-480p-Q4_K_M.gguf (WanVideo GGUF - recommended for low RAM)
-- wan2.1-i2v-14b-480p-Q8_0.gguf (WanVideo GGUF - higher quality)
-- Wan2_1-InfiniteTalk_Single_Q8.gguf (InfiniteTalk GGUF)
-
-## VAE Models (models/vae/)
-- Wan2_1_VAE_bf16.safetensors (actual WanVideo VAE - compatible with WanVideoVAELoader)
-- Wan2_1_VAE_fp32.safetensors (fp32 version if available, otherwise symlinked to bf16)
-
-## Text Encoders (models/text_encoders/)
-- umt5-xxl-enc-bf16.safetensors (for InfiniteTalk)
-
-## CLIP Vision (models/clip_vision/)
-- clip_vision_h.safetensors (for InfiniteTalk)
-
-## Audio (models/audio/)
-- chinese-wav2vec2-base.bin (speech recognition)
-
-## LoRAs (models/loras/)
-- Wan21_T2V_14B_lightx2v_cfg_step_distill_lora_rank32.safetensors (recommended)
-- lightx2v_I2V_14B_480p_cfg_step_distill_rank64_bf16.safetensors (if available)
-
-## Workflow Fixes for Common Errors:
-1. WanVideoVAELoader error: Use 'Wan2_1_VAE_fp32.safetensors' or remove VAE loader
-2. Model path errors: Use filename only, no subdirectories (e.g., 'wan2.1-i2v-14b-480p-Q4_K_M.gguf')
-3. Sampler field errors: Use default values (start_step: 0, end_step: 25, cfg: 7.0)
-4. LoRA path errors: Use exact filename from /models/loras/ folder
-EOL
 
 # --- 11: Verify installations and create troubleshooting guide (UPDATED) ---
 echo "--- Verifying installations ---"
